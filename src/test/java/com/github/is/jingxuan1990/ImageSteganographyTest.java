@@ -14,6 +14,20 @@ import org.junit.Test;
  */
 public class ImageSteganographyTest {
 
+  private static final String AES_KEY = "a22ndy123!@12323";
+
+  @Test
+  public void toImgAES() throws Exception {
+    boolean bool = ImageSteganography.toImgAES("andy123", AES_KEY, imageFile().getPath());
+    Assert.assertTrue(bool);
+  }
+
+  @Test
+  public void fromImgAES() throws Exception {
+    String msg = ImageSteganography.fromImgAES(AES_KEY, imageFile().getPath());
+    Assert.assertTrue("andy123".equals(msg));
+  }
+
   private static final String MSG = "liwenhao123~";
 
   private File imageFile() throws URISyntaxException {

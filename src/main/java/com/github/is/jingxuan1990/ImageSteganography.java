@@ -2,6 +2,7 @@ package com.github.is.jingxuan1990;
 
 import com.github.is.jingxuan1990.algorithm.Steganography;
 import com.github.is.jingxuan1990.exception.SteganographyException;
+import com.github.is.jingxuan1990.util.AesCrypt;
 import com.github.is.jingxuan1990.util.ImageUtils;
 import com.github.is.jingxuan1990.util.Utils;
 import java.awt.image.BufferedImage;
@@ -10,6 +11,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.GeneralSecurityException;
 import javax.imageio.ImageIO;
 
 /**
@@ -55,6 +57,21 @@ public class ImageSteganography {
   }
 
   /**
+   * Save the encoded text using AES-128 into image.
+   *
+   * @param msg message
+   * @param password aes secret key
+   * @param imagePath image path
+   * @return true or false
+   * @throws GeneralSecurityException AES encoded failed
+   */
+  public static boolean toImgAES(String msg, String password, String imagePath)
+      throws GeneralSecurityException {
+    String encMsg = AesCrypt.encrypt(password, msg);
+    return toImg(encMsg, imagePath);
+  }
+
+  /**
    * Get text from image.
    *
    * @param imagePath image path.
@@ -85,6 +102,20 @@ public class ImageSteganography {
         }
       }
     }
+  }
+
+  /**
+   * Get the decode text from image.
+   *
+   * @param password aes secret key
+   * @param imagePath image path
+   * @return origin text
+   * @throws GeneralSecurityException AES decode failed
+   */
+  public static String fromImgAES(String password, String imagePath)
+      throws GeneralSecurityException {
+    String encMsg = fromImg(imagePath);
+    return AesCrypt.decrypt(password, encMsg);
   }
 
 }
