@@ -14,11 +14,32 @@ import org.junit.Test;
  */
 public class ImageSteganographyTest {
 
-  private static final String AES_KEY = "a22ndy123!@12323";
+  private static final String AES_KEY = "andy123!@123";
+  private static final String DATA = "liwenhao123~";
+
+
+  private File imageFile() throws URISyntaxException {
+    URL url = ImageSteganographyTest.class.getResource("test.png");
+    return new File(url.toURI());
+  }
+
+
+  @Test
+  public void toImg() throws Exception {
+    ImageSteganography.toImg(DATA, imageFile().getPath());
+  }
+
+  @Test
+  public void fromImg() throws Exception {
+    String msg = ImageSteganography.fromImg(imageFile().getPath());
+    Assert.assertTrue(DATA.equals(msg));
+  }
+
 
   @Test
   public void toImgAES() throws Exception {
-    boolean bool = ImageSteganography.toImgAES("andy123", AES_KEY, imageFile().getPath());
+    boolean bool = ImageSteganography
+        .toImgAES("andy123", AES_KEY, imageFile().getPath());
     Assert.assertTrue(bool);
   }
 
@@ -28,22 +49,17 @@ public class ImageSteganographyTest {
     Assert.assertTrue("andy123".equals(msg));
   }
 
-  private static final String MSG = "liwenhao123~";
-
-  private File imageFile() throws URISyntaxException {
-    URL url = ImageSteganographyTest.class.getResource("test.png");
-    return new File(url.toURI());
+  @Test
+  public void toImgAESWithPW() throws Exception {
+    boolean retBool = ImageSteganography.toImgAESWithPW(DATA, AES_KEY, imageFile().getPath());
+    Assert.assertTrue(retBool);
   }
 
-  @Test
-  public void toImg() throws Exception {
-    ImageSteganography.toImg(MSG, imageFile().getPath());
-  }
 
   @Test
-  public void fromImg() throws Exception {
-    String msg = ImageSteganography.fromImg(imageFile().getPath());
-    Assert.assertTrue(MSG.equals(msg));
+  public void fromImgAESWithPW() throws Exception {
+    String data = ImageSteganography.fromImgAESWithPW(imageFile().getPath());
+    Assert.assertTrue(data.length() > 0);
   }
 
 }

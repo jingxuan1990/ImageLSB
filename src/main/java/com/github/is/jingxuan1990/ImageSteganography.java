@@ -22,13 +22,13 @@ import javax.imageio.ImageIO;
 public class ImageSteganography {
 
   /**
-   * Save text into image.
+   * Save data into image.
    *
-   * @param msg text
+   * @param data - the saved data
    * @param imagePath image path(only support png and jpg)
    * @return true: succeed false: failed
    */
-  public static boolean toImg(String msg, String imagePath) {
+  public static boolean toImg(String data, String imagePath) {
     File imageFile = new File(imagePath);
     InputStream inputStream = null;
     try {
@@ -40,7 +40,7 @@ public class ImageSteganography {
 
       // hide text
       Steganography steganography = new Steganography();
-      steganography.encode(image, msg, startingOffset);
+      steganography.encode(image, data, startingOffset);
       return ImageIO.write(image, ImageUtils.getFileExt(imageFile), imageFile);
     } catch (FileNotFoundException e) {
       throw new RuntimeException("Couldn't find file " + imagePath, e);
@@ -56,23 +56,39 @@ public class ImageSteganography {
     }
   }
 
+
   /**
-   * Save the encoded text using AES-128 into image.
+   * Save the encoded data using AES into image.
    *
-   * @param msg message
+   * @param data message
    * @param password aes secret key
    * @param imagePath image path
    * @return true or false
    * @throws GeneralSecurityException AES encoded failed
    */
-  public static boolean toImgAES(String msg, String password, String imagePath)
+  public static boolean toImgAES(String data, String password, String imagePath)
       throws GeneralSecurityException {
-    String encMsg = AesCrypt.encrypt(password, msg);
+    String encMsg = AesCrypt.encrypt(password, data);
     return toImg(encMsg, imagePath);
   }
 
+
   /**
-   * Get text from image.
+   * Save the aes key and data into the image.
+   *
+   * @param data - data
+   * @param password - aes key
+   * @param imagePath - image
+   * @return true or false
+   */
+  public static boolean toImgAESWithPW(String data, String password, String imagePath)
+      throws GeneralSecurityException {
+    String encMsg = AesCrypt.encrypt(password, data);
+    return toImg(encryptDecrypt(password + "|" + encMsg), imagePath);
+  }
+
+  /**
+   * Get the data from image.
    *
    * @param imagePath image path.
    * @return String text
@@ -116,6 +132,31 @@ public class ImageSteganography {
       throws GeneralSecurityException {
     String encMsg = fromImg(imagePath);
     return AesCrypt.decrypt(password, encMsg);
+  }
+
+  /**
+   * Get the data from the image using the password also saved into the image.
+   *
+   * @param imagePath - image
+   * @return the decoded data
+   */
+  public static String fromImgAESWithPW(String imagePath)
+      throws GeneralSecurityException {
+    String data = fromImg(imagePath);
+    data = encryptDecrypt(data);
+    int indexOf = data.indexOf("|");
+    String password = data.substring(0, indexOf);
+    data = data.substring(indexOf);
+    return AesCrypt.decrypt(password, data);
+  }
+
+  private static String encryptDecrypt(String input) {
+    char[] key = {'N', 'E', 'T', 'S', 'E', 'C', 'K', 'I', 'T'};
+    StringBuilder output = new StringBuilder();
+    for (int i = 0; i < input.length(); i++) {
+      output.append((char) (input.charAt(i) ^ key[i % key.length]));
+    }
+    return output.toString();
   }
 
 }
